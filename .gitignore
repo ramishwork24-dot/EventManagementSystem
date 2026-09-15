@@ -1,0 +1,9 @@
+# Virtual environment folder name (match your folder name)
+venv/
+*.venv/
+env/
+
+# Standard Python ignore patterns
+__pycache__/
+*.pyc
+.env
