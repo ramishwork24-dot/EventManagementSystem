@@ -1,9 +1,28 @@
-# Virtual environment folder name (match your folder name)
-venv/
-*.venv/
-env/
-
-# Standard Python ignore patterns
-__pycache__/
-*.pyc
+# Security & Environment Variables
 .env
+.env.*
+!.env.example
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python Bytecode & Local Database
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+
+# Django Assets
+staticfiles/
+media/
+
+# IDE & Operating System Files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
