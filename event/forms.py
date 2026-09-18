@@ -64,31 +64,42 @@ class BookingForm(forms.Form):
         cleaned_data = super().clean()
         if not self.event:
             raise ValidationError("An event context is required to process this booking.")
+
         total_tickets_requested = 0
         has_selection = False
-        for field_name, value in cleaned_data.items():
-            #generating id to collect the right ticket record
-            if field_name.startswith('ticket_') and value and value > 0:
-                ticket_id = field_name.split('_')[1]
-                try:
-                    ticket = self.event.tickets.get(id=ticket_id)
-                except Ticket.DoesNotExist:
-                    raise ValidationError('Invalid ticket selection.')
-                #if more tickets are ordered than the amount available
-                if value > ticket.quantity_available:
-                    self.add_error(
-                        field_name,
-                        f'Only {ticket.quantity_available} tickets available for {ticket.tier_name}.'
-                    )
-                #incrementing because now we have at least one more record
-                total_tickets_requested += value
-                has_selection = True
-        #catching empty selections
+        field_errors = {}
+
+        # Iterate over self.fields instead of cleaned_data to stay immune to dictionary mutations
+        for field_name in self.fields:
+            if field_name.startswith('ticket_'):
+                value = cleaned_data.get(field_name)
+                if value and value > 0:
+                    ticket_id = field_name.split('_')[1]
+                    try:
+                        ticket = self.event.tickets.get(id=ticket_id)
+                    except Ticket.DoesNotExist:
+                        raise ValidationError('Invalid ticket selection.')
+
+                    if value > ticket.quantity_available:
+                        field_errors[field_name] = (
+                            f'Only {ticket.quantity_available} tickets available for {ticket.tier_name}.'
+                        )
+
+                    total_tickets_requested += value
+                    has_selection = True
+
+        # Attach field errors AFTER iteration completes
+        for field_name, error_msg in field_errors.items():
+            self.add_error(field_name, error_msg)
+
         if not has_selection:
             raise ValidationError('You must select at least one ticket to proceed.')
-        #if tickets ordered exceed the number of tickets available
+
         if total_tickets_requested > self.event.capacity:
-            raise ValidationError(f'Requested tickets ({total_tickets_requested}) exceed total remaining event capacity ({self.event.capacity}).')
+            raise ValidationError(
+                f'Requested tickets ({total_tickets_requested}) exceed total remaining event capacity ({self.event.capacity}).'
+            )
+
         return cleaned_data
     
     #Helper method to extract (ticket, quantity) tuples for view processing.
