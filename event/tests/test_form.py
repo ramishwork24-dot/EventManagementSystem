@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 from datetime import timedelta, datetime
 from decimal import Decimal
+from django.contrib.auth.models import User
 now = timezone.now()
 
 #Tests for EventForm
@@ -79,7 +80,9 @@ class EventFormTest(TestCase):
 class TicketFormSetTest(TestCase):
     #Inline formsets require management form data explicitly defined
     def setUp(self):
+        self.test_user = User.objects.create(username='Test User', password='password123')
         self.event = Event.objects.create(
+            organizer = self.test_user,
             title = 'Test Event',
             description = 'Testing Purposes Only',
             location = 'Test Location',
@@ -148,7 +151,9 @@ class TicketFormSetTest(TestCase):
 #Tests for BookingForm
 class BookingFormTest(TestCase):
     def setUp(self):
+        self.test_user = User.objects.create(username='Test User', password='password123')
         self.event = Event.objects.create(
+            organizer = self.test_user,
             title = 'Test Event',
             description = 'Testing Purposes Only',
             location = 'Test Location',

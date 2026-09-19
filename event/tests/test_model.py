@@ -17,9 +17,12 @@ TEMP_MEDIA_DIR = tempfile.mkdtemp()
 #'Event' Tests
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_DIR)
 class EventModelTest(TestCase):
+    def setUp(self):
+        self.test_user = User.objects.create(username='test user', password='password123')
     def test_successful_save_and_representation(self):
         #Set Up
         test_event = Event.objects.create(
+            organizer = self.test_user,
             title = 'Test Title',
             description = 'Testing Purposes Only',
             location = 'Test location',
@@ -36,6 +39,7 @@ class EventModelTest(TestCase):
     def test_datetime_validation(self):
         #Set Up
         test_event = Event(
+            organizer = self.test_user,
             title="Test Title",
             description="Testing Purposes Only",
             location="Test location",
@@ -64,6 +68,7 @@ class EventModelTest(TestCase):
             name='test.gif', content=test_gif, content_type='image/gif'
         )
         event = Event.objects.create(
+            organizer = self.test_user,
             title="Image Test",
             location="Venue",
             start_time=now + timedelta(days=1),
@@ -77,7 +82,9 @@ class EventModelTest(TestCase):
 #'Ticket' Tests
 class TicketModelTest(TestCase):
     def setUp(self):
+        self.test_user = User.objects.create(username='test user', password='password123')
         self.test_event = Event.objects.create(
+            organizer = self.test_user,
             title = 'Test Title',
             description = 'Testing Purposes Only',
             location = 'Test location',
@@ -152,11 +159,21 @@ class TicketModelTest(TestCase):
 class BookingModelTest(TestCase):
     def setUp(self):
         self.test_user = User.objects.create(username='test_user', password='password123')
+        self.test_event = Event.objects.create(
+            organizer = self.test_user,
+            title = 'Test Title',
+            description = 'Testing Purposes Only',
+            location = 'Test location',
+            start_time = now + timedelta(days=1),
+            end_time = now + timedelta(days=1, hours=3),
+            capacity = 100
+        )
 
     def test_correct_str_representation_and_default(self):
         #Set Up
         test_booking = Booking.objects.create(
             user = self.test_user,
+            event = self.test_event,
             total_price = 90.99
         )
         #Test
@@ -166,10 +183,12 @@ class BookingModelTest(TestCase):
         #Set Up
         test_booking1 = Booking.objects.create(
             user = self.test_user,
+            event = self.test_event,
             total_price = 20.99
         )
         test_booking2 = Booking.objects.create(
             user = self.test_user,
+            event = self.test_event,
             total_price = 80.99
         )
         bookings = self.test_user.bookings.all()
@@ -186,6 +205,7 @@ class BookingItemModelTest(TestCase):
             password = 'password123'
         )
         self.test_event = Event.objects.create(
+            organizer = self.test_user2,
             title = 'Test Title',
             description = 'Testing Purposes Only',
             location = 'Test location',
@@ -195,6 +215,7 @@ class BookingItemModelTest(TestCase):
         )
         self.test_booking = Booking.objects.create(
             user = self.test_user2,
+            event = self.test_event,
             total_price = 70.99
         )
         self.test_ticket = Ticket.objects.create(
@@ -208,9 +229,9 @@ class BookingItemModelTest(TestCase):
         #Set Up
         test_booking_item = BookingItem.objects.create(
             booking = self.test_booking,
-            ticket_type = self.test_ticket,
+            ticket = self.test_ticket,
             quantity = 5,
-            unit_price = 90.00
+            price_at_purchase = 90.00
         )
         #Test
         self.assertEqual(str(test_booking_item), f'5x VIP (Booking #{self.test_booking.pk})')
@@ -219,9 +240,9 @@ class BookingItemModelTest(TestCase):
         #Set Up
         test_booking_item = BookingItem(
             booking = self.test_booking,
-            ticket_type = self.test_ticket,
+            ticket = self.test_ticket,
             quantity = 0,
-            unit_price = 90.00
+            price_at_purchase = 90.00
         )
         #Test
         with self.assertRaises(ValidationError):
@@ -231,15 +252,15 @@ class BookingItemModelTest(TestCase):
         #Set Up
         test_booking_item1 = BookingItem.objects.create(
             booking = self.test_booking,
-            ticket_type = self.test_ticket,
+            ticket = self.test_ticket,
             quantity = 5,
-            unit_price = 90.00
+            price_at_purchase = 90.00
         )
         test_booking_item2 = BookingItem.objects.create(
             booking = self.test_booking,
-            ticket_type = self.test_ticket,
+            ticket = self.test_ticket,
             quantity = 5,
-            unit_price = 90.00
+            price_at_purchase = 90.00
         )
         booking_items = self.test_booking.items.all()
         #Test

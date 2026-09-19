@@ -10,6 +10,7 @@ from decimal import Decimal
 #Event model that represents the gathering or occasion
 class Event(models.Model):
     #Database Fields
+    organizer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='organized_events')
     title = models.CharField(max_length=255, db_index=True) #Name of the event
     description = models.TextField(blank=True) #short description, optional
     location = models.CharField(max_length=255) #Venue
@@ -58,6 +59,10 @@ class Ticket(models.Model):
         verbose_name_plural = "Ticket Tiers"
     def __str__(self):
         return f"{self.event.title} - {self.tier_name}"
+    
+    def get_tickets_sold_count(self):
+        result = self.booking_items.aggregate(total_sold=models.Sum("quantity"))
+        return result["total_sold"] or 0
 
 #Booking model represents a user's transaction/reservation order.
 class Booking(models.Model):
@@ -68,6 +73,7 @@ class Booking(models.Model):
         CANCELLED = 'CAN', 'Cancelled'
     #Database Fields
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings') #Foreign Key to default user model
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='bookings')
     status = models.CharField(max_length=3, choices=Status.choices, default=Status.PENDING) #Choice box for status of booking
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), validators=[MinValueValidator(Decimal('0.00'))])
     created_at = models.DateTimeField(auto_now_add=True) #Automatic timestamp at the time of creation
@@ -86,9 +92,9 @@ class Booking(models.Model):
 class BookingItem(models.Model):
     #Database Fields
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="items")
-    ticket_type = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="booking_items")
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="booking_items")
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
+    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
 
     #Database Behaviour
     class Meta:
@@ -96,7 +102,7 @@ class BookingItem(models.Model):
         verbose_name_plural = "Booking Items"
 
     def __str__(self):
-        return f"{self.quantity}x {self.ticket_type.tier_name} (Booking #{self.booking_id})"
+        return f"{self.quantity}x {self.ticket.tier_name} (Booking #{self.booking_id})"
 
 
 
