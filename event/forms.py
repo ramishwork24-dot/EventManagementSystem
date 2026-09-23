@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from .models import Event, Ticket
 from django.core.exceptions import ValidationError
 
@@ -111,4 +113,14 @@ class BookingForm(forms.Form):
                 ticket = self.event.tickets.get(id=ticket_id)
                 selected.append((ticket, quantity))
         return selected
+    
+#SignUpForm deals with authentication
+class SignUpForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = UserCreationForm.Meta.fields + ('email', 'first_name', 'last_name')
     

@@ -104,6 +104,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Auth redirects
+LOGIN_REDIRECT_URL = 'event_home'
+LOGOUT_REDIRECT_URL = 'event_home'
+LOGIN_URL = 'login'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/

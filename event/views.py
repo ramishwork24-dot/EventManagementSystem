@@ -1,15 +1,17 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import FormMixin
 from django.utils import timezone
 from django.db import transaction
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.views import View
 
 from .models import Event, Ticket, Booking, BookingItem
-from .forms import BookingForm, EventForm, TicketFormSet
+from .forms import BookingForm, EventForm, TicketFormSet, SignUpForm
 
 # Create your views here.
 
@@ -214,3 +216,18 @@ class UserBookingListView(LoginRequiredMixin, ListView):
             .select_related('event').prefetch_related('items__ticket').order_by('-created_at')
         )
 
+#SignUpView is responsible for accoutn registration
+class SignUpView(SuccessMessageMixin, CreateView):
+    form_class = SignUpForm
+    template_name = 'accounts/signup.html'
+    success_url = reverse_lazy('login')
+    success_message = 'Account created successfully! You can log now in.'
+
+#UserLoginView is responsible for repeated authentication
+class UserLoginView(LoginView):
+    template_name = 'accounts/login.html'
+    redirect_authenticated_user = True
+
+#UserLogoutView lets user safely exit their account
+class UserLogoutView(LogoutView):
+    next_page = 'event_home'
