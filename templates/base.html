@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Event Hub - Ticket Management{% endblock %}</title>
+</head>
+<body>
+    
+    <!--Navbar-->
+    <header>
+        <nav>
+            <div class="nav-brand">
+                <a href="{% url 'event_home' %}"><strong>Event Hub</strong></a>
+            </div>
+
+            <div class="nav-links">
+                <a href="{% url 'event_home' %}#upcoming-events">Browse Events</a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'event_create' %}">Register Event</a>
+                    <a href="{% url 'user_booking_list' %}">My Tickets</a>
+                {% endif %}
+            </div>
+
+            <div class="nav-auth">
+                {% if user.is_authenticated %}
+                    <span>Hello, {{ user.get_short_name|default:user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit">Log Out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Log In</a>
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+
+    <!--Global Messages-->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    <!--Main Content Injection-->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+
+    <!--Footer-->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col-about">
+                <h3>Event Hub</h3>
+                <p>High-integrity event ticketing and instant stock management platform.</p>
+            </div>
+
+            <div class="footer-col-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{% url 'event_home' %}">Home</a></li>
+                    <li><a href="{% url 'event_home' %}#upcoming-events">Upcoming Events</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'event_create' %}">Register Event</a></li>
+                        <li><a href="{% url 'user_booking_list' %}">My Bookings</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Log In</a></li>
+                        <li><a href="{% url 'signup' %}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="footer-col-legal">
+                <h4>Legal & Support</h4>
+                <ul>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Support Center</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} Event Hub Inc. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discover & Book Events - Event Hub{% endblock %}
+
+{% block content %}
+
+<section id="hero">
+    <div class="hero-container">
+        <h1>Experience Live Events Without the Friction</h1>
+        <p>Book tickets in real-time with guaranteed inventory, instant confirmations, and zero queue dropouts.</p>
+
+        <div class="hero-actions">
+            <!--Register an event-->
+            <a href="{% url 'event_create' %}" class="btn btn-primary">
+                Register Your Event
+            </a>
+
+            <!--Buy Tickets for an upcoming event-->
+            <a href="#upcoming-events" class="btn btn-secondary">
+                Buy Tickets
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!--Upcoming Events Section-->
+<section class="upcoming-events">
+    <div class="section-header">
+        <h2>Upcoming Events</h2>
+        <p>Discover live conferences, concerts, and workshops near you.</p>
+    </div>
+
+    <div class="events-grid">
+        {% for event in events %}
+            <article class="event-card">
+                <!--Banner-->
+                <div class="card-image">
+                    {% if event.banner_image %}
+                        <img src="{{ event.banner_image.url }}" alt="{{ event.title }} Banner">
+                    {% else %}
+                        <div class="placeholder-text">{{ event.title }}</div>
+                    {% endif %}
+                </div>
+
+                <!--Info-->
+                <div class="card-body">
+                    <span class="event-date">
+                        {{ event.start_time|date:"F j, Y" }} &bull; {{ event.start_time|date:"g:i A" }}
+                    </span>
+
+                    <h3>{{ event.title }}</h3>
+                    <p class="event-location">📍 {{ event.location }}</p>
+                    <p class="event-organizer">Organized By: {{ event.organizer.get_full_name|default:event.organizer.username }}</p>
+
+                    <!--Ticket tiers-->
+                    <div class="tickets-preview">
+                        {% with first_ticket=event.tickets.all|first %}
+                            {% if first_ticket %}
+                                <span>Starts from <strong>${{ first_ticket.price }}</strong></span>
+                            {% else %}
+                                <span>Contact Organizer</span>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <a href="{% url 'event_detail' event.pk %}" class="btn btn-block">
+                        Details
+                    </a>
+                </div>
+            </article>
+        {% empty %}
+            <div class="no-events">
+                <h3>No upcoming events right now.</h3>
+                <p>Check back later or be the first to host one!</p>
+                <a href="{% url 'event_create' %}" class="btn">Register an Event</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!--Pagination-->
+    {% if is_paginated %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+
+{% endblock %}
