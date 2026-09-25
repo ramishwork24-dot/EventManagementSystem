@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} - Event Hub{% endblock %}
+
+{% block content %}
+
+<article class="event-detail">
+
+    <!--Event Header-->
+    <header class="event-header">
+        <div class="banner-wrapper">
+            {% if event.banner_image %}
+                <img src="{{ event.banner_image.url }}" alt="{{event.title}} Banner">
+            {% else %}
+                <div class="banner-placeholder">
+                    <h1>{{ event.title }}</h1>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="event-meta-header">
+            {% if event.banner_image %}
+                <h1>{{ event.title }}</h1>
+            {% endif %}
+            <p class="organizer">
+                Hosted by <strong>{{event.organizer.get_full_name|default:event.organizer.username}}</strong>
+            </p>
+        </div>
+    </header>
+
+    <div class="event-detail-grid">
+
+        <!--Left column: event description-->
+        <section class="event-info">
+            <h2>About This Event</h2>
+            <div class="event-description">
+                {{ event.description|linebreaks }}
+            </div>
+
+            <div class="event-logistics">
+                <h3>Date & Location</h3>
+                <p><i class="fa-regular fa-calendar"></i><strong> Starts:</strong> {{ event.start_time|date:"F j, Y" }} at {{ event.start_time|date:"g:i A" }}</p>
+                <p><i class="fa-solid fa-calendar"></i><strong> Ends:</strong> {{ event.end_time|date:"F j, Y" }} at {{ event.end_time|date:"g:i A" }}</p>
+                <p><i class="fa-solid fa-location-dot"></i><strong> Location:</strong> {{ event.location }}</p>
+                <p><i class="fa-solid fa-user"></i><strong> Capacity:</strong> {{ event.capacity } total seats}</p>
+            </div>
+        </section>
+
+        <!--Right Column: ticket selection-->
+        <aside class="booking-section">
+            <h2>Reserve Tickets</h2>
+
+            {% if user.is_authenticated %}
+                <form action="{% url 'booking_create' event.pk %}" method="post" class="booking-form">
+                    {% csrf_token %}
+
+                    {% if form.non_fields_errors %}
+                        <div class="form-errors">
+                            {% for error in form.non_field_errors %}
+                                <p class="error-msg">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="ticket-tier-list">
+                        {% for ticket in event.tickets.all %}
+                            <div class="ticket-tier-card">
+                                <div class="tier-info">
+                                    <h4>{{ ticket.tier_name }}</h4>
+                                    <p class="price">${{ ticket.price }}</p>
+
+                                    {% if ticket.quantity_available > 0 %}
+                                        <span class="stock-badge in-stock">
+                                            {{ ticket.quantity_available }} remaining
+                                        </span>
+                                    {% else %}
+                                        <span class="stock-badge sold-out">
+                                            Sold Out
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="tier-selection">
+                                    {% if ticket.quantity_available > 0 %}
+                                        <label for="id_ticket_{{ ticket.id }}">Qty:</label>
+                                        <input type="number" name="ticket_{{ ticket.id }}" id="id_ticket_{{ ticket.id }}" min="0" max="{{ ticket.quantity_available }}" value="0">
+                                    {% else %}
+                                        <input type="number" disabled value="0">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No ticket tiers have been created for this event</p>
+                        {% endfor %}
+                    </div>
+
+                    {% if event.tickets.exists %}
+                        <button type="submit" class="btn btn-primary btn-block">Confirm Booking</button>
+                    {% endif %}
+                </form>
+            {% else %}
+                <!--unauthenticated user prompt-->
+                <div class="auth-prompt">
+                    <p>Please log in or sign up to reserve tickets for this event.</p>
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-secondary">Log In</a>
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+
+</article>
+
+{% endblock %}

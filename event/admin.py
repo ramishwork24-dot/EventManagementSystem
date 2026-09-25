@@ -21,7 +21,7 @@ class EventAdmin(admin.ModelAdmin):
 
     def banner_preview(self, obj):
         if obj.banner_image:
-            return format_html('<img src="{}" style="max-height: 40px; border-radius: 4px;" />', obj.banner_image.url())
+            return format_html('<img src="{}" style="max-height: 40px; border-radius: 4px;" />', obj.banner_image.url)
         return '-'
     banner_preview.short_description = 'Banner'
 

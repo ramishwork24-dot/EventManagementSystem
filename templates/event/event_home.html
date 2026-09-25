@@ -51,7 +51,7 @@
                     </span>
 
                     <h3>{{ event.title }}</h3>
-                    <p class="event-location">📍 {{ event.location }}</p>
+                    <p class="event-location"><i class="fa-solid fa-location-dot"></i> {{ event.location }}</p>
                     <p class="event-organizer">Organized By: {{ event.organizer.get_full_name|default:event.organizer.username }}</p>
 
                     <!--Ticket tiers-->

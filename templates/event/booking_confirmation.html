@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Receipt #{{ booking.id }} - Event Hub{% endblock %}
+
+{% block content %}
+
+<section class="checkout-receipt">
+
+    <header class="receipt-header">
+        <h1>Booking Receipt</h1>
+        <p class="receipt-id">Order Ref: <strong>#{{ booking.id }}</strong></p>
+        <p class="receipt-date">Issued: {{ booking.created_at|date:"F j, Y &bull; g:i A" }}</p>
+    </header>
+
+    <hr>
+
+    <div class="receipt-meta">
+        <div class="meta-block">
+            <h3>Event</h3>
+            <p><strong>{{ booking.event.title }}</strong></p>
+
+            <a href="{% url 'event_detail' booking.event.pk %}" class="link-detail">
+                View Event Details &rarr;
+            </a>
+        </div>
+
+        <div class="meta-block">
+            <h3>Billed To</h3>
+            <p>{{ booking.user.get_full_name|default:booking.user.username }}</p>
+            <p>{{ booking.user.email }}</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="receipt-breakdown">
+        <h3>Order Items</h3>
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>Item / Tier</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in booking.items.all %}
+                    <tr>
+                        <td>{{ item.ticket.tier_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price_at_purchase }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">No item details recorded</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>Total Amount Charged</strong></td>
+                    <td><strong>${{ booking.total_price }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <hr>
+
+    <div class="receipt-actions">
+        <a href="{% url 'user_booking_list' %}" class="btn btn-secondary">
+            Booking History
+        </a>
+        <a href="{% url 'event_home' %}" class="btn btn-primary">
+            Return Home
+        </a>
+    </div>
+
+</section>
+
+{% endblock %}
