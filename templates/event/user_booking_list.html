@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bookings - Event Hub{% endblock %}
+
+{% block content %}
+
+    <section class="booking-history-container">
+        <header class="page-header">
+            <h1>My Booking History</h1>
+            <p>Review all your ticket purchases, order receipts, and upcoming event passes.</p>
+        </header>
+
+        <div class="booking-flex-list">
+            {% for booking in bookings %}
+                <article class="booking-card">
+                    <div class="card-header">
+                        <div class="order-info">
+                            <span class="order-id">Order Ref: <strong>#{{ booking.id }}</strong></span>
+                            <span class="purchase-date">&bull; Booked on {{ booking.created_at|date:"F j, Y" }} at {{booking.created_at|date:"g:i A"}}</span>
+                        </div>
+                        <div class="booking-status">
+                            <span class="status-badge">Approval: {{ booking.get_status_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="event-summary">
+                            <h2>{{ booking.event.title }}</h2>
+                            <p class="event-time">
+                                <strong>Date: </strong>{{booking.event.start_time|date:"F j, Y &bull; g:i A"}}
+                            </p>
+                            <p class="event-location">
+                                <strong>Venue: </strong>{{ booking.event.location }}
+                            </p>
+                        </div>
+
+                        <div class="purchase-breakdown">
+                            <h3>Purchased Tickets</h3>
+                            <table class="item-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket Tier</th>
+                                        <th>Quantity</th>
+                                        <th>Price per Ticket</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in booking.items.all %}
+                                        <tr>
+                                            <td>{{ item.ticket.tier_name }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>{{ item.price_at_purchase }}</td>
+                                            <td>{{ item.price_at_purchase }} x {{ item.quantity }}</td>
+                                        </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4">No purchase recorded</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="total-amount">
+                            <span>Total Paid: </span>
+                            <strong>${{ booking.total_price }}</strong>
+                        </div>
+
+                        <div class="card-actions">
+                            <a href="{% url 'event_detail' booking.event.pk %}" class="btn btn-secondary">
+                                View Event Page
+                            </a>
+                            <a href="{% url 'booking_confirmation' booking.pk %}" class="btn btn-primary">
+                                Full Receipt
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+            <!-- EMPTY STATE -->
+                <div class="no-bookings-card">
+                    <h3>No Bookings Found</h3>
+                    <p>You haven't reserved tickets for any events yet.</p>
+                    <a href="{% url 'event_home' %}#upcoming-events" class="btn btn-primary">
+                        Browse Upcoming Events
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+{% endblock %}

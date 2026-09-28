@@ -42,8 +42,8 @@
                 <h3>Date & Location</h3>
                 <p><i class="fa-regular fa-calendar"></i><strong> Starts:</strong> {{ event.start_time|date:"F j, Y" }} at {{ event.start_time|date:"g:i A" }}</p>
                 <p><i class="fa-solid fa-calendar"></i><strong> Ends:</strong> {{ event.end_time|date:"F j, Y" }} at {{ event.end_time|date:"g:i A" }}</p>
-                <p><i class="fa-solid fa-location-dot"></i><strong> Location:</strong> {{ event.location }}</p>
-                <p><i class="fa-solid fa-user"></i><strong> Capacity:</strong> {{ event.capacity } total seats}</p>
+                <p><i class="fa-solid fa-location-dot"></i><strong> Venue:</strong> {{ event.location }}</p>
+                <p><i class="fa-solid fa-user"></i><strong> Capacity:</strong> {{ event.capacity }} total seats</p>
             </div>
         </section>
 

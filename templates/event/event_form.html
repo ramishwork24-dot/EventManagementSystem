@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Edit Event{% else %}Register Event{% endif %} - Event Hub{% endblock %}
+
+{% block content %}
+
+<section class="form-page-wrapper">
+
+    <!--Main Container-->
+    <div class="event-form-card">
+        <header class="form-header">
+            <h2>{% if object %}Edit Event: {{object.title}}{% else %}Register a New Event{% endif %}</h2>
+            <p>Fill in the event details below to publish your event.</p>
+        </header>
+
+            <!--Multipart encoding for ImageField upload-->
+        <form method="post" enctype="multipart/form-data" class="event-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors-global">
+                    {% for error in form.non_field_errors %}
+                        <p class="error-msg">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <fieldset class="form-section">
+                <legend>Basic Information</legend>
+                    
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Event Title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <span class="field-error">{{ form.title.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <span class="field-error">{{ form.description.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Schedule & Venue</legend>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label for="{{ form.start_time.id_for_label }}">Start Date & Time</label>
+                        {{ form.start_time }}
+                        {% if form.start_time.errors %}
+                            <span class="field-error">{{ form.start_time.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.end_time.id_for_label }}">End Date & Time</label>
+                        {{ form.end_time }}
+                        {% if form.end_time.errors %}
+                            <span class="field-error">{{ form.end_time.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}">Venue</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <span class="field-error">{{ form.location.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.capacity.id_for_label }}">Capacity</label>
+                        {{ form.capacity }}
+                        {% if form.capacity.errors %}
+                            <span class="field-error">{{ form.capacity.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-selection">
+                <legend>Event Banner</legend>
+                <div class="form-group">
+                    <label for="{{ form.banner_image.id_for_label }}">Banner Image</label>
+                    {{ form.banner_image }}
+                    {% if form.banner_image.errors %}
+                        <span class="field-error">{{ form.banner_image.errors.0 }}</span>
+                    {% endif %}
+                    <small class="help-text">Optional. If omitted, the event title will display inside a fallback header.</small>
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <a href="{% url 'event_home' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if object %}Save Changes{% else %}Register{% endif %}
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}
