@@ -225,8 +225,8 @@ class OrganizerDashboardView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Event.objects.filter(organizer=self.request.user).prefetch_related(
-            'bookings__items__tickets',
-            'booking__user'
+            'bookings__items__ticket',
+            'bookings__user'
         ).order_by('-start_time')
 
 #BookingApproveView enables organizers to approve tickets within their dashboards
@@ -235,10 +235,13 @@ class BookingApproveView(LoginRequiredMixin, UserPassesTestMixin, View):
         booking = get_object_or_404(Booking, pk=pk)
 
         with transaction.atomic():
-            booking.status.CON 
+            booking.status = booking.Status.CONFIRMED
             booking.save()
             messages.success(request, f'Booking #{booking.id} has been approved.')
         return redirect('organizer_dashboard')
+    def test_func(self):
+        booking = get_object_or_404(Booking, pk=self.kwargs['pk'])
+        return self.request.user == booking.event.organizer
 
 #BookingCancelView enables organizers to cancel/reject tickets
 class BookingCancelView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -246,11 +249,11 @@ class BookingCancelView(LoginRequiredMixin, UserPassesTestMixin, View):
         booking = get_object_or_404(Booking, pk=pk)
 
         #prevent redundant cancellation
-        if booking.status == Booking.status.CAN:
+        if booking.status == Booking.Status.CANCELLED:
             messages.warning(request, f'Booking #{booking.id} is already cancelled.')
             return redirect('organizer_dashboard')
         with transaction.atomic():
-            booking.status = Booking.status.CAN
+            booking.status = Booking.Status.CANCELLED
             booking.save()
 
             for item in booking.items.select_related('ticket'):
@@ -259,6 +262,9 @@ class BookingCancelView(LoginRequiredMixin, UserPassesTestMixin, View):
                 ticket.save()
             messages.success(request, f'Booking #{booking.id} has been cancelled')
         return redirect('organizer_dashboard')
+    def test_func(self):
+        booking = get_object_or_404(Booking, pk=self.kwargs['pk'])
+        return self.request.user == booking.event.organizer
     
 #SignUpView is responsible for accoutn registration
 class SignUpView(SuccessMessageMixin, CreateView):

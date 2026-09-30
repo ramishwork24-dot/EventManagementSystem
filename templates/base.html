@@ -19,6 +19,7 @@
                 <a href="{% url 'event_home' %}#upcoming-events">Browse Events</a>
 
                 {% if user.is_authenticated %}
+                    <a href="{% url 'organizer_dashboard' %}">Dashboard</a>
                     <a href="{% url 'event_create' %}">Register Event</a>
                     <a href="{% url 'user_booking_list' %}">My Tickets</a>
                 {% endif %}

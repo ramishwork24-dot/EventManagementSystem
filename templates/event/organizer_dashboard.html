@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Organizer Dashboard - Event Hub{% endblock %}
+
+{% block content %}
+
+    <section class="dashboard-wrapper">
+        <header class="dashboard-header">
+            <h1>Organizer Dashboard</h1>
+            <a href="{% url 'event_create' %}" class="btn btn-primary">Register New Event</a>
+        </header>
+
+        {% for event in events %}
+            <article class="dashboard-event-card">
+                <div class="event-summary-bar">
+                    <h2>{{ event.title }}</h2>
+                    <p>{{ event.location }} &bull; {{ event.start_time|date:'M j, Y' }}</p>
+                    <a href="{% url 'event_update' event.pk %}" class="btn btn-secondary">Edit Event</a>
+                </div>
+
+                <div class="pending-bookings-section">
+                    <h3>Booking Management</h3>
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Order Ref</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in event.bookings.all %}
+                                <tr>
+                                    <td>#{{ booking.id }}</td>
+                                    <td>{{ booking.user.email }}</td>
+                                    <td><span class="badge">{{ booking.get_status_display }}</span></td>
+                                    <td>${{ booking.total_price }}</td>
+                                    <td>
+                                        {% if booking.status != 'CAN' %}
+                                            <div class="approval-btn">
+                                                {% if booking.status == 'PEN' %}
+                                                    <form action="{% url 'booking_approve' booking.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                                    </form>
+                                                {% endif %}
+
+                                                <form action="{% url 'booking_cancel' booking.pk %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                                        Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        {% else %}
+                                            <span class="badge badge-cancelled">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5">No Bookings received yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        {% empty %}
+            <div class="no-events-card">
+                <p>You haven't created any events yet.</p>
+                <a href="{% url 'event_create' %}" class="btn btn-primary">Host Your First Event</a>
+            </div>
+        {% endfor %}
+    </section>
+
+{% endblock %}
