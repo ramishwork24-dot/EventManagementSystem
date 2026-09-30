@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import FormMixin
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import F
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
@@ -216,6 +217,49 @@ class UserBookingListView(LoginRequiredMixin, ListView):
             .select_related('event').prefetch_related('items__ticket').order_by('-created_at')
         )
 
+#OrganizerDashboardView allows organizers to manage their events
+class OrganizerDashboardView(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = 'event/organizer_dashboard.html'
+    context_object_name = 'events'
+
+    def get_queryset(self):
+        return Event.objects.filter(organizer=self.request.user).prefetch_related(
+            'bookings__items__tickets',
+            'booking__user'
+        ).order_by('-start_time')
+
+#BookingApproveView enables organizers to approve tickets within their dashboards
+class BookingApproveView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def post(self, request, pk):
+        booking = get_object_or_404(Booking, pk=pk)
+
+        with transaction.atomic():
+            booking.status.CON 
+            booking.save()
+            messages.success(request, f'Booking #{booking.id} has been approved.')
+        return redirect('organizer_dashboard')
+
+#BookingCancelView enables organizers to cancel/reject tickets
+class BookingCancelView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def post(self, request, pk):
+        booking = get_object_or_404(Booking, pk=pk)
+
+        #prevent redundant cancellation
+        if booking.status == Booking.status.CAN:
+            messages.warning(request, f'Booking #{booking.id} is already cancelled.')
+            return redirect('organizer_dashboard')
+        with transaction.atomic():
+            booking.status = Booking.status.CAN
+            booking.save()
+
+            for item in booking.items.select_related('ticket'):
+                ticket = Ticket.objects.select_for_update().get(pk=item.ticket_id)
+                ticket.quantity_available += item.quantity
+                ticket.save()
+            messages.success(request, f'Booking #{booking.id} has been cancelled')
+        return redirect('organizer_dashboard')
+    
 #SignUpView is responsible for accoutn registration
 class SignUpView(SuccessMessageMixin, CreateView):
     form_class = SignUpForm

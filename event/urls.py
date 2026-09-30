@@ -12,6 +12,10 @@ urlpatterns = [
     path('event/<int:pk>/confirmation/', views.BookingConfirmationView.as_view(), name='booking_confirmation'),
     path('my-bookings/', views.UserBookingListView.as_view(), name='user_booking_list'),
 
+    path('dashboard/', views.OrganizerDashboardView.as_dict() if hasattr(views.OrganizerDashboardView, 'as_dict') else views.OrganizerDashboardView.as_view(), name='organizer_dashboard'),
+    path('bookings/<int:pk>/approve/', views.BookingApproveView.as_view(), name='booking_approve'),
+    path('bookings/<int:pk>/cancel/', views.BookingCancelView.as_view(), name='booking_cancel'),    
+
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('login/', views.UserLoginView.as_view(), name='login'),
     path('logout/', views.UserLogoutView.as_view(), name='logout'),
