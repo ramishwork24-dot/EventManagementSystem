@@ -9,6 +9,7 @@
 
     <!--Main Container-->
     <div class="event-form-card">
+        <img src="{% static 'images/form-bg.png' %}" alt="" class="form-bg">
         <header class="form-header">
             <h2>{% if object %}Edit Event: {{object.title}}{% else %}Register a New Event{% endif %}</h2>
             <p>Fill in the event details below to publish your event.</p>
@@ -29,16 +30,16 @@
             <fieldset class="form-section">
                 <legend>Basic Information</legend>
                     
-                <div class="form-group">
-                    <label for="{{ form.title.id_for_label }}">Event Title</label>
+                <div class="form-group title">
+                    <label for="{{ form.title.id_for_label }}"><i class="fa-solid fa-star"></i> Event Title</label>
                     {{ form.title }}
                     {% if form.title.errors %}
                         <span class="field-error">{{ form.title.errors.0 }}</span>
                     {% endif %}
                 </div>
 
-                <div class="form-group">
-                    <label for="{{ form.description.id_for_label }}">Description</label>
+                <div class="form-group title">
+                    <label for="{{ form.description.id_for_label }}"><i class="fa-solid fa-pen"></i> Description</label>
                     {{ form.description }}
                     {% if form.description.errors %}
                         <span class="field-error">{{ form.description.errors.0 }}</span>
@@ -47,11 +48,11 @@
 
             </fieldset>
 
-            <fieldset class="form-section">
+            <fieldset class="form-section event-info">
                 <legend>Schedule & Venue</legend>
                 <div class="form-row-2col">
                     <div class="form-group">
-                        <label for="{{ form.start_time.id_for_label }}">Start Date & Time</label>
+                        <label for="{{ form.start_time.id_for_label }}"><i class="fa-solid fa-calendar-days"></i> Start Date & Time</label>
                         {{ form.start_time }}
                         {% if form.start_time.errors %}
                             <span class="field-error">{{ form.start_time.errors.0 }}</span>
@@ -59,7 +60,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="{{ form.end_time.id_for_label }}">End Date & Time</label>
+                        <label for="{{ form.end_time.id_for_label }}"><i class="fa-regular fa-calendar-days"></i> End Date & Time</label>
                         {{ form.end_time }}
                         {% if form.end_time.errors %}
                             <span class="field-error">{{ form.end_time.errors.0 }}</span>
@@ -69,7 +70,7 @@
 
                 <div class="form-row-2col">
                     <div class="form-group">
-                        <label for="{{ form.location.id_for_label }}">Venue</label>
+                        <label for="{{ form.location.id_for_label }}"><i class="fa-solid fa-map-pin"></i> Venue</label>
                         {{ form.location }}
                         {% if form.location.errors %}
                             <span class="field-error">{{ form.location.errors.0 }}</span>
@@ -77,7 +78,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="{{ form.capacity.id_for_label }}">Capacity</label>
+                        <label for="{{ form.capacity.id_for_label }}"><i class="fa-solid fa-person"></i> Capacity</label>
                         {{ form.capacity }}
                         {% if form.capacity.errors %}
                             <span class="field-error">{{ form.capacity.errors.0 }}</span>
@@ -86,9 +87,82 @@
                 </div>
             </fieldset>
 
-            <fieldset class="form-selection">
+            <fieldset class="form-section">
+                <legend>Ticket Tiers</legend>
+
+                <!-- Management form is REQUIRED for Django formsets -->
+                {{ ticket_formset.management_form }}
+
+                {% if ticket_formset.non_form_errors %}
+                    <div class="form-errors-global">
+                        {% for error in ticket_formset.non_form_errors %}
+                            <p class="error-msg">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="ticket-formset-list">
+                    {% for ticket_form in ticket_formset %}
+                        <div class="ticket-form-card">
+                            
+                            <!-- Hidden inputs (ID fields required for existing instances) -->
+                            {% for hidden in ticket_form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+
+                            {% if ticket_form.non_field_errors %}
+                                <div class="field-errors">
+                                    {% for error in ticket_form.non_field_errors %}
+                                        <p class="error-msg">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-row-3col">
+                                <div class="form-group">
+                                    <label for="{{ ticket_form.tier_name.id_for_label }}">Tier Name</label>
+                                    {{ ticket_form.tier_name }}
+                                    {% if ticket_form.tier_name.errors %}
+                                        <span class="field-error">{{ ticket_form.tier_name.errors.0 }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="{{ ticket_form.price.id_for_label }}">Price ($)</label>
+                                    {{ ticket_form.price }}
+                                    {% if ticket_form.price.errors %}
+                                        <span class="field-error">{{ ticket_form.price.errors.0 }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="{{ ticket_form.quantity_available.id_for_label }}">Quantity</label>
+                                    {{ ticket_form.quantity_available }}
+                                    {% if ticket_form.quantity_available.errors %}
+                                        <span class="field-error">{{ ticket_form.quantity_available.errors.0 }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Deletion checkbox for existing tiers during edit -->
+                            {% if object %}
+                            <div class="form-group-checkbox">
+                                <label for="{{ ticket_form.DELETE.id_for_label }}">
+                                    {{ ticket_form.DELETE }} Remove this ticket tier
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-tier-btn" class="btn btn-block">
+                    + Add Another Ticket Tier
+                </button>
+            </fieldset>
+
+            <fieldset class="form-section">
                 <legend>Event Banner</legend>
-                <div class="form-group">
+                <div class="form-group img-btn">
                     <label for="{{ form.banner_image.id_for_label }}">Banner Image</label>
                     {{ form.banner_image }}
                     {% if form.banner_image.errors %}
@@ -109,5 +183,54 @@
     </div>
 
 </section>
+
+<!-- HIDDEN HTML TEMPLATE FOR CLONING NEW TICKET FORM ROWS -->
+<template id="ticket-empty-form-template">
+    <div class="ticket-form-card">
+        {% for hidden in ticket_formset.empty_form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+        <div class="form-row-3col">
+            <div class="form-group">
+                <label for="{{ ticket_formset.empty_form.tier_name.id_for_label }}">Tier Name</label>
+                {{ ticket_formset.empty_form.tier_name }}
+            </div>
+            <div class="form-group">
+                <label for="{{ ticket_formset.empty_form.price.id_for_label }}">Price ($)</label>
+                {{ ticket_formset.empty_form.price }}
+            </div>
+            <div class="form-group">
+                <label for="{{ ticket_formset.empty_form.quantity_available.id_for_label }}">Quantity</label>
+                {{ ticket_formset.empty_form.quantity_available }}
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- JAVASCRIPT FOR DYNAMIC FORMSET EXPANSION -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addBtn = document.getElementById('add-tier-btn');
+        const formsetList = document.querySelector('.ticket-formset-list');
+        const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+        const emptyFormTemplate = document.getElementById('ticket-empty-form-template');
+
+        if (addBtn && formsetList && totalFormsInput && emptyFormTemplate) {
+            addBtn.addEventListener('click', function() {
+                // 1. Get current form index count
+                const currentCount = parseInt(totalFormsInput.value, 10);
+
+                // 2. Replace '__prefix__' placeholders with current integer index
+                const newFormHtml = emptyFormTemplate.innerHTML.replace(/__prefix__/g, currentCount);
+
+                // 3. Append new card into DOM
+                formsetList.insertAdjacentHTML('beforeend', newFormHtml);
+
+                // 4. Increment management form TOTAL_FORMS value
+                totalFormsInput.value = currentCount + 1;
+            });
+        }
+    });
+</script>
 
 {% endblock %}

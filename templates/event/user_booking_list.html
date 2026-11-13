@@ -14,6 +14,9 @@
         <div class="booking-flex-list">
             {% for booking in bookings %}
                 <article class="booking-card">
+                    <img src="{% static 'images/booking-card-tr.png' %}" alt="" class="booking-card-tr">
+                    <img src="{% static 'images/booking-card-bl.png' %}" alt="" class="booking-card-bl">
+
                     <div class="card-header">
                         <div class="order-info">
                             <span class="order-id">Order Ref: <strong>#{{ booking.id }}</strong></span>
@@ -28,7 +31,7 @@
                         <div class="event-summary">
                             <h2>{{ booking.event.title }}</h2>
                             <p class="event-time">
-                                <strong>Date: </strong>{{booking.event.start_time|date:"F j, Y &bull; g:i A"}}
+                                <strong>Date: </strong>{{booking.event.start_time|date:"F j, Y | l, g:i A"}}
                             </p>
                             <p class="event-location">
                                 <strong>Venue: </strong>{{ booking.event.location }}
@@ -59,16 +62,16 @@
                                         <td colspan="4">No purchase recorded</td>
                                     </tr>
                                     {% endfor %}
+                                    <tr>
+                                        <td colspan="3">Grand Total</td>
+                                        <td>${{ booking.total_price }}</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
                     <div class="card-footer">
-                        <div class="total-amount">
-                            <span>Total Paid: </span>
-                            <strong>${{ booking.total_price }}</strong>
-                        </div>
 
                         <div class="card-actions">
                             <a href="{% url 'event_detail' booking.event.pk %}" class="btn btn-secondary">

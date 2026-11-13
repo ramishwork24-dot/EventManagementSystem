@@ -7,13 +7,14 @@
 
 <section id="hero">
     <div class="hero-container">
-        <h1>Experience Live Events Without the Friction</h1>
+        <h1>Event Hub</h1>
+        <h2>Experience Live Events Without the Friction</h2>
         <p>Book tickets in real-time with guaranteed inventory, instant confirmations, and zero queue dropouts.</p>
 
         <div class="hero-actions">
             <!--Register an event-->
             <a href="{% url 'event_create' %}" class="btn btn-primary">
-                Register Your Event
+                Register Event
             </a>
 
             <!--Buy Tickets for an upcoming event-->
@@ -22,11 +23,18 @@
             </a>
         </div>
     </div>
+    <div class="hero-img">
+        <img src="{% static 'images/hero-graphic.svg' %}" alt="Event Hub Live Experience">
+    </div>
 </section>
 
 
 <!--Upcoming Events Section-->
-<section class="upcoming-events">
+<section class="upcoming-events" id="upcoming-events">
+    <!-- Corner Watermarks -->
+    <img src="{% static 'images/watermark-tl.png' %}" alt="" class="watermark-tl" aria-hidden="true">
+    <img src="{% static 'images/watermark-br.png' %}" alt="" class="watermark-br" aria-hidden="true">
+
     <div class="section-header">
         <h2>Upcoming Events</h2>
         <p>Discover live conferences, concerts, and workshops near you.</p>
@@ -35,10 +43,12 @@
     <div class="events-grid">
         {% for event in events %}
             <article class="event-card">
+                <img src="{% static 'images/ribbon-br.png' %}" alt="" class="ribbon-br" aria-hidden="true">
                 <!--Banner-->
                 <div class="card-image">
+                    <img src="{% static 'images/ribbon-tl.png' %}" alt="" class="ribbon-tl" aria-hidden="true">
                     {% if event.banner_image %}
-                        <img src="{{ event.banner_image.url }}" alt="{{ event.title }} Banner">
+                        <img class="banner-img" src="{{ event.banner_image.url }}" alt="{{ event.title }} Banner">
                     {% else %}
                         <div class="placeholder-text">{{ event.title }}</div>
                     {% endif %}
@@ -47,6 +57,7 @@
                 <!--Info-->
                 <div class="card-body">
                     <span class="event-date">
+                        <i class="fa-regular fa-calendar"></i>
                         {{ event.start_time|date:"F j, Y" }} &bull; {{ event.start_time|date:"g:i A" }}
                     </span>
 
@@ -76,7 +87,7 @@
             <div class="no-events">
                 <h3>No upcoming events right now.</h3>
                 <p>Check back later or be the first to host one!</p>
-                <a href="{% url 'event_create' %}" class="btn">Register an Event</a>
+                <a href="{% url 'event_create' %}" class="btn btn-primary">Register an Event</a>
             </div>
         {% endfor %}
     </div>

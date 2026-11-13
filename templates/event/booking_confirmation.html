@@ -7,10 +7,13 @@
 
 <section class="checkout-receipt">
 
+    <img src="{% static 'images/receipt-corner-tr.png' %}" alt="" class="receipt-corner-tr">
+    <img src="{% static 'images/receipt-corner-bl.png' %}" alt="" class="receipt-corner-bl">
+
     <header class="receipt-header">
         <h1>Booking Receipt</h1>
         <p class="receipt-id">Order Ref: <strong>#{{ booking.id }}</strong></p>
-        <p class="receipt-date">Issued: {{ booking.created_at|date:"F j, Y &bull; g:i A" }}</p>
+        <p class="receipt-date">Issued: {{ booking.created_at|date:"F j, Y | g:i A" }}</p>
     </header>
 
     <hr>

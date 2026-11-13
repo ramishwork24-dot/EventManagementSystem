@@ -5,15 +5,15 @@
 
 {% block content %}
 
-    <section class="auth-page-wrapper">
-        <div class="auth-card">
+    <section class="form-page-wrapper auth-page-wrapper">
+        <div class="event-form-card auth-card">
 
-            <div class="auth-header">
+            <div class="form-header auth-header">
                 <h2>Log In To Event Hub</h2>
                 <p>Please enter your credentials to access your account.</p>
             </div>
             
-            <form action="{% url 'login' %}" method="post" class="auth-form">
+            <form action="{% url 'login' %}" method="post" class="event-form auth-form">
                 {% csrf_token %}
                 {% if form.errors %}
                     <div class="form-errors-global">
@@ -21,7 +21,7 @@
                     </div>
                 {% endif %}
 
-                <input type="hidden" name="next" value="{{ next|default:request.GET.next }}">
+                <input type="hidden" name="next" value="{{ next }}">
 
                 <div class="form-group">
                     <label for="form.username.id_for_label">Username</label>
@@ -33,7 +33,7 @@
                     {{ form.password }}
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                <button type="submit" class="btn btn-primary">Log In</button>
 
                 <div class="auth-footer">
                     <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>

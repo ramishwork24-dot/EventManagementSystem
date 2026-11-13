@@ -1,41 +1,56 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Event Hub - Ticket Management{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <script src="https://kit.fontawesome.com/3eafd1c0c4.js" crossorigin="anonymous"></script>
+    <link rel="shortcut icon" href="{% static 'images/logo.svg' %}" type="image/x-icon">
 </head>
 <body>
     
     <!--Navbar-->
-    <header>
+    <header class="base-header">
         <nav>
             <div class="nav-brand">
+                <img src="{% static 'images/logo.svg' %}" alt="Event Hub Logo" class="brand-logo-img">
                 <a href="{% url 'event_home' %}"><strong>Event Hub</strong></a>
             </div>
 
-            <div class="nav-links">
-                <a href="{% url 'event_home' %}#upcoming-events">Browse Events</a>
+            <button type="button" 
+                class="mobile-nav-toggle" 
+                aria-controls="primary-navigation" 
+                aria-expanded="false" 
+                aria-label="Toggle navigation menu">
+                <i class="fa-solid fa-bars icon-menu"></i>
+                <i class="fa-solid fa-xmark icon-close"></i>
+            </button>
 
-                {% if user.is_authenticated %}
-                    <a href="{% url 'organizer_dashboard' %}">Dashboard</a>
-                    <a href="{% url 'event_create' %}">Register Event</a>
-                    <a href="{% url 'user_booking_list' %}">My Tickets</a>
-                {% endif %}
-            </div>
+            <div class="nav-menu-wrapper" id="primary-navigation">
+                <div class="nav-links">
+                    <a href="{% url 'event_home' %}#upcoming-events">Browse Events</a>
 
-            <div class="nav-auth">
-                {% if user.is_authenticated %}
-                    <span>Hello, {{ user.get_short_name|default:user.username }}</span>
-                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit">Log Out</button>
-                    </form>
-                {% else %}
-                    <button type="button" onclick="document.getElementById('login-dialog').showModal()" class="btn-link">Log In</button>
-                    <a href="{% url 'signup' %}">Sign Up</a>
-                {% endif %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'event_create' %}">Register Event</a>
+                        <a href="{% url 'user_booking_list' %}">My Tickets</a>
+                        <a href="{% url 'organizer_dashboard' %}">Dashboard</a>
+                    {% endif %}
+                </div>
+
+                <div class="nav-auth">
+                    {% if user.is_authenticated %}
+                        <span>Hello, {{ user.get_short_name|default:"Organizer" }}</span>
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Log Out</button>
+                        </form>
+                    {% else %}
+                        <button type="button" onclick="document.getElementById('login-dialog').showModal()" class="btn btn-link">Log In</button>
+                        <a href="{% url 'signup' %}" class="btn">Sign Up</a>
+                    {% endif %}
+                </div>
             </div>
         </nav>
     </header>
@@ -65,7 +80,9 @@
         <div class="footer-container">
             <div class="footer-col-about">
                 <h3>Event Hub</h3>
-                <p>High-integrity event ticketing and instant stock management platform.</p>
+                <p>
+                    Event Hub is a modern, high-integrity ticketing platform engineered for seamless event management, instant booking processing, and real-time inventory synchronization. From tech summits to live music, we connect organizers and attendees with speed, clarity, and reliability.
+                </p>
             </div>
 
             <div class="footer-col-links">
@@ -100,6 +117,7 @@
 
     <!--LOGIN MODAL DIALOG-->
     <dialog id="login-dialog" class="auth-modal">
+        <img src="{% static 'images/logo.svg' %}" alt="" class="login-watermark">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Welcome Back</h3>
@@ -122,7 +140,7 @@
                 </div>
 
                 <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                    <button type="submit" class="btn btn-secondary">Log In</button>
                 </div>
 
                 <div class="modal-footer">
@@ -132,5 +150,64 @@
         </div>
     </dialog>
 
+    <!--NOTIFICATIONS / POPUPS-->
+    <!-- Global Messages -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <span>{{ message }}</span>
+                    <button type="button" class="alert-close" aria-label="Close">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+<script>
+//LOGIN MODAL
+document.addEventListener('DOMContentLoaded', () => {
+    const navToggle = document.querySelector('.mobile-nav-toggle');
+    const navMenu = document.querySelector('.nav-menu-wrapper');
+
+    if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => {
+            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+            
+            // Toggle accessible state and active menu class
+            navToggle.setAttribute('aria-expanded', !isExpanded);
+            navMenu.classList.toggle('is-open');
+        });
+    }
+});
+
+//POPUPS
+document.addEventListener('DOMContentLoaded', () => {
+    const alerts = document.querySelectorAll('.alert');
+
+    alerts.forEach(alert => {
+        // Function to smoothly remove the alert
+        const dismissAlert = () => {
+            alert.classList.add('fade-out');
+            // Remove from DOM after transition finishes (matches CSS 0.4s duration)
+            setTimeout(() => {
+                alert.remove();
+            }, 400);
+        };
+
+        // 1. Auto-dismiss after 4.5 seconds
+        const autoDismissTimer = setTimeout(dismissAlert, 4500);
+
+        // 2. Manual dismiss via close button
+        const closeBtn = alert.querySelector('.alert-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(autoDismissTimer); // Prevent auto-dismiss conflict
+                dismissAlert();
+            });
+        }
+    });
+});
+</script>
 </body>
 </html>
